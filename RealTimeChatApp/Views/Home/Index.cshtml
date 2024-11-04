@@ -66,6 +66,7 @@
         padding: 10px;
         position: absolute;
         z-index: 1000;
+        cursor: move;
     }
 
     .emoji {
@@ -81,6 +82,7 @@
     #emojiButton {
         outline: none;
     }
+
 </style>
 
 
@@ -253,6 +255,27 @@
     document.getElementById("emojiButton").addEventListener("click", () => {
         const emojiPicker = document.getElementById("emojiPicker");
         emojiPicker.style.display = emojiPicker.style.display === "none" ? "block" : "none";
+    });
+
+    const emojiPicker = document.getElementById('emojiPicker');
+
+    emojiPicker.setAttribute('draggable', 'true');
+
+    emojiPicker.addEventListener('dragstart', (event) => {
+        event.dataTransfer.setData('text/plain', null);
+    });
+
+    emojiPicker.addEventListener('dragend', (event) => {
+        const x = event.clientX;
+        const y = event.clientY;
+
+        emojiPicker.style.position = 'absolute';
+        emojiPicker.style.left = `${x}px`;
+        emojiPicker.style.top = `${y}px`;
+    });
+
+    document.addEventListener('dragover', (event) => {
+        event.preventDefault();
     });
 
     function insertEmoji(emoji) {
