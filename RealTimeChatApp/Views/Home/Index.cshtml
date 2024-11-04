@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Ana Sayfa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .chat-container {
+        border: 1px solid #ced4da;
+        border-radius: 0.5rem;
+        background-color: #f8f9fa;
+    }
+
+    .messages {
+        background-color: white;
+    }
+</style>
+<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="alert alert-info text-center" role="alert">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <p>Hoş geldin, <strong>@User.Identity.Name!</strong></p>
+            <a href="@Url.Action("Logout", "Account")" class="btn btn-danger">Çıkış Yap</a>
+
+            <div class="chat-container mt-4">
+                <div id="messagesList" class="messages border p-3 rounded" style="height: 300px; overflow-y: auto;">
+                </div>
+                <div class="input-group mt-2">
+                    <input type="text" id="messageInput" class="form-control" placeholder="Mesaj yazın..." />
+                    <button id="sendButton" class="btn btn-primary">Gönder</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <p>Lütfen giriş yapınız.</p>
+            <a href="@Url.Action("Login", "Account")" class="btn btn-secondary">Giriş Yap</a>
+        }
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+
+<script>
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub")
+        .build();
+
+    connection.on("ReceiveMessage", (user, message) => {
+        const msgElement = document.createElement("div");
+        msgElement.classList.add("message");
+        const timestamp = new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+        msgElement.textContent = `${user} [${timestamp}]: ${message}`;
+        document.getElementById("messagesList").appendChild(msgElement);
+        document.getElementById("messagesList").scrollTop = document.getElementById("messagesList").scrollHeight;
+    });
+
+    connection.start().catch(err => console.error(err.toString()));
+
+    document.getElementById("sendButton").addEventListener("click", () => {
+        const message = document.getElementById("messageInput").value;
+        const user = "@User.Identity.Name";
+
+        if (message) {
+            connection.invoke("SendMessage", user, message).catch(err => {
+                alert("Mesaj gönderilirken bir hata oluştu: " + err.toString());
+            });
+            document.getElementById("messageInput").value = "";
+        }
+    });
+</script>

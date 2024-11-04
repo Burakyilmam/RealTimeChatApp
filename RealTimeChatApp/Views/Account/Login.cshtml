@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">Giriş Yap</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form asp-action="Login" method="post" class="border p-4 rounded bg-light">
+                <div class="form-group">
+                    <label for="username">Kullanıcı Adı:</label>
+                    <input type="text" name="username" class="form-control" required />
+                </div>
+                <center><button type="submit" class="btn btn-primary btn-block mt-2">Giriş Yap</button></center>
+            </form>
+        </div>
+    </div>
+</div>
