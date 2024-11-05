@@ -7,12 +7,23 @@
         background-color: #e5ddd5;
     }
 
+    .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        height: 100vh;
+        padding: 20px;
+    }
+
     .chat-container {
+        width: 100%;
         border: 1px solid #ddd;
         border-radius: 8px;
         background-color: #ffffff;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
     }
 
     .messages {
@@ -83,20 +94,67 @@
         outline: none;
     }
 
+    .user-list-container {
+        width: 25%;
+        background-color: #ffffff;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+        .user-list li {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+            .user-list li .user-name {
+                flex-grow: 1;
+                padding-left: 10px;
+            }
+
+            .user-list li .status {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background-color: green;
+                margin-left: 10px;
+            }
+
+                .user-list li .status.offline {
+                    background-color: gray;
+                }
 </style>
 
 
-<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+<div class="container">
     @if (User.Identity.IsAuthenticated)
     {
-        <div class="float:left;">
+        <div class="user-list-container">
+            <h5 class="text-center mb-2">Aktif Kullanıcılar</h5>
+            <ul id="userList" class="user-list">
+                <!-- Aktif kullanıcılar burada görünecek -->
+            </ul>
+        </div>
+
+        <div class="float:left">
             <div class="alert alert-warning text-center" role="alert">
                 <p>Hoş geldin, <strong>@User.Identity.Name!</strong></p>
                 <a href="@Url.Action("Logout", "Account")" class="btn btn-danger">Çıkış Yap</a>
             </div>
 
-            <div class="chat-container mt-4 d-flex flex-column">
+            <div class="chat-container">
                 <div id="messagesList" class="messages">
+                    <!-- Mesajlar burada görünecek -->
                 </div>
                 <div class="input-group mt-2">
                     <button id="emojiButton" class="btn btn-light">😊</button>
@@ -230,6 +288,25 @@
     // Bağlantıyı başlat
     connection.start().catch(err => console.error(err.toString()));
 
+    // Yeni bir kullanıcı listesine eklendiğinde çalışacak fonksiyon
+    connection.on("UpdateUserList", (userList) => {
+        const userListElement = document.getElementById("userList");
+        userListElement.innerHTML = ""; // Mevcut listeyi temizle
+
+        userList.forEach(user => {
+            const li = document.createElement("li");
+            const status = document.createElement("span");
+            status.classList.add("status");
+
+            // Eğer kullanıcı aktifse, yeşil; değilse gri yapılacak
+            status.classList.add(user === "@User.Identity.Name" ? "online" : "offline");
+
+            li.innerHTML = `<span class="user-name">${user}</span>`;
+            li.appendChild(status);
+            userListElement.appendChild(li);
+        });
+    });
+
     // Enter tuşuna basıldığında mesaj gönderme
     document.getElementById("messageInput").addEventListener("keypress", (event) => {
         if (event.key === "Enter") {
@@ -254,7 +331,11 @@
 <script>
     document.getElementById("emojiButton").addEventListener("click", () => {
         const emojiPicker = document.getElementById("emojiPicker");
-        emojiPicker.style.display = emojiPicker.style.display === "none" ? "block" : "none";
+        if (emojiPicker.style.display === "none") {
+            emojiPicker.style.display = "block";
+        } else {
+            emojiPicker.style.display = "none";
+        }
     });
 
     const emojiPicker = document.getElementById('emojiPicker');
