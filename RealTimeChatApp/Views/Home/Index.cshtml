@@ -152,6 +152,10 @@
                 <a href="@Url.Action("Logout", "Account")" class="btn btn-danger">Çıkış Yap</a>
             </div>
 
+            <div id="typingAlert" class="alert alert-danger text-center" role="alert" style="display: none;">
+                <p><strong>@User.Identity.Name</strong> yazıyor...</p>
+            </div>
+
             <div class="chat-container">
                 <div id="messagesList" class="messages">
                     <!-- Mesajlar burada görünecek -->
@@ -285,9 +289,6 @@
         document.getElementById("messagesList").scrollTop = document.getElementById("messagesList").scrollHeight;
     });
 
-    // Bağlantıyı başlat
-    connection.start().catch(err => console.error(err.toString()));
-
     // Yeni bir kullanıcı listesine eklendiğinde çalışacak fonksiyon
     connection.on("UpdateUserList", (userList) => {
         const userListElement = document.getElementById("userList");
@@ -307,6 +308,60 @@
         });
     });
 
+    // Kullanıcı yazarken çalışacak fonksiyon
+    document.getElementById("messageInput").addEventListener("input", (event) => {
+        const message = event.target.value;
+
+        // Mesaj kutusunda yazı varsa yazma durumunu başlat
+        if (message.length > 0) {
+            connection.invoke("SendTypingStatus", "@User.Identity.Name").catch(err => console.error(err.toString()));
+        } 
+        else {
+            connection.invoke("StopTypingStatus", "@User.Identity.Name").catch(err => console.error(err.toString()));
+        }
+    });
+
+    // Diğer kullanıcı yazmaya başladığında turuncu renk gösterilecek
+    connection.on("UserIsTyping", (userName) => {
+        const userListItems = document.querySelectorAll(".user-list li");
+
+        if (userName !== "@User.Identity.Name") {
+            document.getElementById("typingAlert").style.display = "block";
+        }
+
+        userListItems.forEach(item => {
+            const userNameElement = item.querySelector(".user-name");
+            if (userNameElement && userNameElement.textContent === userName) {
+                let statusSpan = item.querySelector(".status");
+                if (statusSpan) {
+                    statusSpan.style.backgroundColor = "orange";
+                    statusSpan.classList.add("typing");
+                }
+            }
+        });
+    });
+
+    // Diğer kullanıcı yazmayı durdurduğunda normal duruma dön
+    connection.on("UserStoppedTyping", (userName) => {
+        const userListItems = document.querySelectorAll(".user-list li");
+
+        if (userName !== "@User.Identity.Name") {
+            document.getElementById("typingAlert").style.display = "none";
+        }
+
+        userListItems.forEach(item => {
+            const userNameElement = item.querySelector(".user-name");
+            if (userNameElement && userNameElement.textContent === userName) {
+                let statusSpan = item.querySelector(".status");
+                if (statusSpan) {
+                    statusSpan.style.backgroundColor = "gray";
+                    statusSpan.classList.remove("typing");
+                }
+            }
+        });
+    });
+
+
     // Enter tuşuna basıldığında mesaj gönderme
     document.getElementById("messageInput").addEventListener("keypress", (event) => {
         if (event.key === "Enter") {
@@ -323,9 +378,13 @@
             connection.invoke("SendMessage", user, message).catch(err => {
                 alert("Mesaj gönderilirken bir hata oluştu: " + err.toString());
             });
+            connection.invoke("StopTypingStatus", "@User.Identity.Name").catch(err => console.error(err.toString()));
             document.getElementById("messageInput").value = "";
         }
     });
+
+    // Bağlantıyı başlat
+    connection.start().catch(err => console.error(err.toString()));
 </script>
 
 <script>
