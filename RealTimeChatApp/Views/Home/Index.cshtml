@@ -153,7 +153,7 @@
             </div>
 
             <div id="typingAlert" class="alert alert-danger text-center" role="alert" style="display: none;">
-                <p><strong>@User.Identity.Name</strong> yazıyor <span class="typing-dots"></span></p>
+                <p><strong><span id="currentUserName">@User.Identity.Name</span></strong> yazıyor <span class="typing-dots"></span></p>
             </div>
 
             <div class="chat-container">
@@ -336,7 +336,9 @@
         const userListItems = document.querySelectorAll(".user-list li");
 
         if (userName !== "@User.Identity.Name") {
-            document.getElementById("typingAlert").style.display = "block";
+            const typingAlert = document.getElementById("typingAlert");
+            typingAlert.style.display = "block";
+            document.getElementById("currentUserName").textContent = userName;
         }
 
         userListItems.forEach(item => {
