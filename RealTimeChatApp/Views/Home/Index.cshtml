@@ -134,7 +134,7 @@
                     background-color: gray;
                 }
 </style>
-
+<link href="~/css/dotanimation.css" rel="stylesheet" />
 
 <div class="container">
     @if (User.Identity.IsAuthenticated)
@@ -153,7 +153,7 @@
             </div>
 
             <div id="typingAlert" class="alert alert-danger text-center" role="alert" style="display: none;">
-                <p><strong>@User.Identity.Name</strong> yazıyor...</p>
+                <p><strong>@User.Identity.Name</strong> yazıyor <span class="typing-dots"></span></p>
             </div>
 
             <div class="chat-container">
@@ -267,6 +267,16 @@
     const connection = new signalR.HubConnectionBuilder()
         .withUrl("/chatHub")
         .build();
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const typingDots = document.querySelector(".typing-dots");
+        let dotCount = 1;
+
+        setInterval(function () {
+            typingDots.textContent = '.'.repeat(dotCount);
+            dotCount = (dotCount % 3);
+        }, 500);
+    });
 
     // Mesaj alındığında çalışacak fonksiyon
     connection.on("ReceiveMessage", (user, message) => {

@@ -1,0 +1,32 @@
+.typing-dots {
+    display: inline-block;
+    font-weight: normal;
+    font-size: 1.1em;
+    color: #721c24;
+    position: relative;
+    vertical-align: middle;
+}
+
+    .typing-dots::after {
+        content: '.';
+        position: absolute;
+        animation: dot-blink 1.5s infinite steps(1);
+    }
+
+@keyframes dot-blink {
+    0% {
+        content: '';
+    }
+
+    33% {
+        content: '.';
+    }
+
+    66% {
+        content: '..';
+    }
+
+    100% {
+        content: '...';
+    }
+}
