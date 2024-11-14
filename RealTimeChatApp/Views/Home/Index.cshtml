@@ -42,13 +42,11 @@
     }
 
         .message.other {
-            background-color: #dcf8c6;
             align-self: flex-start;
             margin-left: auto;
         }
 
         .message.self {
-            background-color: #f1f0f0;
             align-self: flex-end;
             margin-right: auto;
         }
@@ -268,6 +266,34 @@
         .withUrl("/chatHub")
         .build();
 
+    const colorList = [
+        "#caffbf",  // Soft Green
+        "#ffadad",  // Soft Red
+        "#ffd6a5",  // Soft Orange
+        "#fdffb6",  // Soft Yellow
+        "#9bf6ff",  // Soft Blue
+        "#a0c4ff",  // Soft Purple
+        "#bdb2ff",  // Light Purple
+        "#ffc3a0",  // Soft Pink
+        "#d4f1f4",  // Light Aqua
+        "#f1c6d6",  // Light Rose
+        "#e3f8d3",  // Pale Mint
+        "#f9f9c5",  // Soft Lemon
+        "#f4e1d2",  // Peachy Cream
+        "#e8d4ff",  // Light Lavender
+        "#f2f2f2",  // Very Light Gray
+    ];
+
+    let userColorMap = {};
+
+    function getUserColor(userName) {
+        if (!userColorMap[userName]) {
+            const colorIndex = Object.keys(userColorMap).length % colorList.length;
+            userColorMap[userName] = colorList[colorIndex];
+        }
+        return userColorMap[userName];
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         const typingDots = document.querySelector(".typing-dots");
         let dotCount = 1;
@@ -282,6 +308,12 @@
     connection.on("ReceiveMessage", (user, message) => {
         const msgElement = document.createElement("div");
         msgElement.classList.add("message", user === "@User.Identity.Name" ? "self" : "other");
+
+        // Kullanıcıya renk atamasını yap
+        const userColor = getUserColor(user);
+
+        // Mesajın arka plan rengini atayın
+        msgElement.style.backgroundColor = userColor;      
 
         // Zaman Formatı
         const timestamp = new Date().toLocaleTimeString([], {
@@ -325,7 +357,7 @@
         // Mesaj kutusunda yazı varsa yazma durumunu başlat
         if (message.length > 0) {
             connection.invoke("SendTypingStatus", "@User.Identity.Name").catch(err => console.error(err.toString()));
-        } 
+        }
         else {
             connection.invoke("StopTypingStatus", "@User.Identity.Name").catch(err => console.error(err.toString()));
         }
