@@ -131,6 +131,7 @@
                 .user-list li .status.offline {
                     background-color: gray;
                 }
+            }
 </style>
 <link href="~/css/dotanimation.css" rel="stylesheet" />
 
@@ -267,21 +268,21 @@
         .build();
 
     const colorList = [
-        "#caffbf",  // Soft Green
-        "#ffadad",  // Soft Red
-        "#ffd6a5",  // Soft Orange
-        "#fdffb6",  // Soft Yellow
-        "#9bf6ff",  // Soft Blue
-        "#a0c4ff",  // Soft Purple
-        "#bdb2ff",  // Light Purple
-        "#ffc3a0",  // Soft Pink
-        "#d4f1f4",  // Light Aqua
-        "#f1c6d6",  // Light Rose
-        "#e3f8d3",  // Pale Mint
-        "#f9f9c5",  // Soft Lemon
-        "#f4e1d2",  // Peachy Cream
-        "#e8d4ff",  // Light Lavender
-        "#f2f2f2",  // Very Light Gray
+        "#4CAF50",  // Green
+        "#2196F3",  // Blue
+        "#F44336",  // Red
+        "#FF9800",  // Orange
+        "#FFEB3B",  // Yellow
+        "#9C27B0",  // Purple
+        "#3F51B5",  // Indigo
+        "#E91E63",  // Pink
+        "#00BCD4",  // Cyan
+        "#795548",  // Brown
+        "#FFC107",  // Amber
+        "#FF8C00",  // Dark Orange
+        "#006400",  // Dark Green
+        "#FFD700",  // Gold
+        "#C0C0C0"   // Silver
     ];
 
     let userColorMap = {};
@@ -343,6 +344,12 @@
 
             // Eğer kullanıcı aktifse, yeşil; değilse gri yapılacak
             status.classList.add(user === "@User.Identity.Name" ? "online" : "offline");
+
+            // Kullanıcıya renk atamasını yap
+            const userColor = getUserColor(user);
+
+            // Kullanıcının sol kenarlık rengini atayın
+            li.style.borderLeft = `12px solid ${userColor}`;
 
             li.innerHTML = `<span class="user-name">${user}</span>`;
             li.appendChild(status);
