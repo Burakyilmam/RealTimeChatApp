@@ -56,11 +56,11 @@
     }
 
     #messageInput {
-        border-top-left-radius: 10px;
-        border-bottom-left-radius: 10px;
+
         border-top-right-radius: 20px;
         border-bottom-right-radius: 20px;
         border: 1px solid #ddd;
+        outline:none;
     }
 
     #sendButton {
@@ -90,6 +90,8 @@
 
     #emojiButton {
         outline: none;
+        border: 1px solid #ddd;
+        background-color: #fff;
     }
 
     .user-list-container {
@@ -131,9 +133,67 @@
                 .user-list li .status.offline {
                     background-color: gray;
                 }
-            }
+    /* Dark Mode Styles */
+    body.dark-mode {
+        background-color: black;
+        color: #f0f0f0;
+    }
+
+        body.dark-mode .container {
+            background-color: black;
+        }
+
+        body.dark-mode .chat-container {
+            background-color: black;
+        }
+
+        body.dark-mode .messages {
+            background-color: #444;
+        }
+
+        body.dark-mode .user-list-container {
+            background-color: black;
+            color: #f0f0f0;
+        }
+
+        body.dark-mode .user-list {
+            background-color: black;
+            color: white;
+        }
+
+        body.dark-mode #emojiButton {
+            background-color: #444;
+            color: white;
+        }
+
+        body.dark-mode .message {
+            background-color: black;
+            color: #f0f0f0;
+        }
+
+        body.dark-mode .input-group button {
+            background-color: orangered;
+            color: #f0f0f0;
+        }
+
+        body.dark-mode .input-group input{
+            background-color: #444;
+            color: #f0f0f0;
+        }
+
+        body.dark-mode .btn-dark {
+            background-color: #f0f0f0;
+            color: black;
+        }
 </style>
+
 <link href="~/css/dotanimation.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<button id="themeToggle" class="btn btn-dark">
+    <i class="fa fa-sun-o" id="sunIcon" style="display: none;"></i>
+    <i class="fa fa-moon-o" id="moonIcon"></i>
+</button>
 
 <div class="container">
     @if (User.Identity.IsAuthenticated)
@@ -484,3 +544,32 @@
     });
 </script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark-mode");
+            document.getElementById("sunIcon").style.display = "none";
+            document.getElementById("moonIcon").style.display = "inline";
+        }
+
+        document.getElementById("themeToggle").addEventListener("click", function () {
+
+            document.body.classList.toggle("dark-mode");
+
+            const sunIcon = document.getElementById("sunIcon");
+            const moonIcon = document.getElementById("moonIcon");
+
+            if (document.body.classList.contains("dark-mode")) {
+                sunIcon.style.display = "inline";
+                moonIcon.style.display = "none";
+                localStorage.setItem("theme", "dark");
+            }
+            else {
+                sunIcon.style.display = "none";
+                moonIcon.style.display = "inline";
+                localStorage.setItem("theme", "light");
+            }
+        });
+    });
+</script>
