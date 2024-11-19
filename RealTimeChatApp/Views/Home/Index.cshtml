@@ -88,7 +88,7 @@
             background-color: #f0f0f0;
         }
 
-    #emojiButton {
+    #emojiButton, #fileButton {
         outline: none;
         border: 1px solid #ddd;
         background-color: #fff;
@@ -161,7 +161,7 @@
             color: white;
         }
 
-        body.dark-mode #emojiButton {
+        body.dark-mode #emojiButton, body.dark-mode #fileButton {
             background-color: #444;
             color: white;
         }
@@ -221,7 +221,11 @@
                 </div>
                 <div class="input-group mt-2">
                     <button id="emojiButton" class="btn btn-light">😊</button>
-                    <input type="text" id="messageInput" class="form-control" placeholder="Mesaj yazınız." />
+                    <button id="fileButton" class="btn btn-light">
+                        📎
+                    </button>
+                    <input type="file" id="fileInput" style="display: none;" multiple />
+                     <input type="text" id="messageInput" class="form-control" placeholder="Mesaj yazınız." />
                     <button id="sendButton" class="btn btn-primary">Gönder</button>
                 </div>
             </div>
@@ -485,6 +489,24 @@
         const message = document.getElementById("messageInput").value;
         const user = "@User.Identity.Name";
 
+        const messageList = document.getElementById("messagesList");
+        const messageInput = document.getElementById("messageInput");
+
+        // messageInput içindeki öğeyi alıyoruz (önizleme)
+        const previewElement = messageInput.firstChild;
+
+        if (previewElement) {
+            const fileType = previewElement.src ? "image" : "file";
+            const fileName = previewElement.alt || previewElement.textContent;
+            const fileData = previewElement.src || previewElement.href;
+
+            // SignalR ile dosya verisini gönderiyoruz
+            connection.invoke("SendFile", fileName, fileData)
+                .catch(err => console.error("File send error: ", err));
+
+            messageInput.innerHTML = "";  // Mesaj gönderildikten sonra inputu temizle
+        }
+
         if (message) {
             connection.invoke("SendMessage", user, message).catch(err => {
                 alert("Mesaj gönderilirken bir hata oluştu: " + err.toString());
@@ -493,6 +515,68 @@
             document.getElementById("messageInput").value = "";
         }
     });
+
+    connection.on("ReceiveFile", function (fileName, receivedData) {
+        const messageList = document.getElementById("messagesList");
+
+        const fileType = fileName.split('.').pop().toLowerCase();
+        let messageElement;
+
+        if (fileType === "jpg" || fileType === "jpeg" || fileType === "png" || fileType === "gif") {
+            messageElement = document.createElement("img");
+            messageElement.src = receivedData;
+            messageElement.alt = fileName;
+            messageElement.style.maxWidth = "200px";
+            messageElement.style.display = "inline";
+        } else {
+            messageElement = document.createElement("a");
+            messageElement.href = receivedData;
+            messageElement.textContent = fileName;
+            messageElement.target = "_blank";
+        }
+
+        messageList.appendChild(messageElement);
+    });
+
+        document.getElementById("fileInput").addEventListener("change", function (event) {
+            const messageInput = document.getElementById("messageInput");
+            const file = event.target.files[0];
+
+            if (file) {
+                const fileReader = new FileReader();
+
+                fileReader.onload = function (e) {
+                    const receivedData = e.target.result;
+
+                    const fileType = file.name.split('.').pop().toLowerCase();
+
+                    // Resim dosyasıysa göster
+                    if (fileType === "jpg" || fileType === "jpeg" || fileType === "png" || fileType === "gif") {
+                        const previewElement = document.createElement("img");
+                        previewElement.src = receivedData;
+                        previewElement.alt = file.name;
+                        previewElement.style.maxWidth = "200px";
+                        previewElement.style.display = "inline";
+                        previewElement.id = "previewImage";
+
+                        messageInput.innerHTML = "";
+                        messageInput.appendChild(previewElement);
+                    } else {
+
+                        const previewElement = document.createElement("a");
+                        previewElement.href = receivedData;
+                        previewElement.textContent = file.name;
+                        previewElement.target = "_blank";
+                        previewElement.id = "previewFile";
+
+                        messageInput.innerHTML = "";
+                        messageInput.appendChild(previewElement);
+                    }
+                };
+
+                fileReader.readAsDataURL(file);
+            }
+        });
 
     // Bağlantıyı başlat
     connection.start().catch(err => console.error(err.toString()));
@@ -534,6 +618,8 @@
         messageInput.value += emoji;
         document.getElementById("emojiPicker").style.display = "none";
         messageInput.focus();
+        const event = new Event("input", { bubbles: true });
+        messageInput.dispatchEvent(event);
     }
 
     window.addEventListener("click", function (event) {
@@ -541,6 +627,11 @@
         if (!event.target.matches('#emojiButton') && !event.target.matches('.emoji')) {
             emojiPicker.style.display = "none";
         }
+    });
+
+    // Dosya Seçme
+    document.getElementById("fileButton").addEventListener("click", () => {
+        document.getElementById("fileInput").click();
     });
 </script>
 

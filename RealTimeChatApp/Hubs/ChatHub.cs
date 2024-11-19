@@ -37,5 +37,10 @@ namespace RealTimeChatApp.Hubs
         {
             await Clients.Others.SendAsync("UserStoppedTyping", userName);
         }
+
+        public async Task SendFile(string fileName, string fileData)
+        {
+            await Clients.All.SendAsync("ReceiveFile", fileName, fileData);
+        }
     }
 }

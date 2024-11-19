@@ -5,7 +5,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 10 * 1024 * 1024;
+});
 builder.Services.AddAuthentication("MyCookieAuth")
             .AddCookie("MyCookieAuth", options =>
             {
